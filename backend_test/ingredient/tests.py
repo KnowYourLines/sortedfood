@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from .serializers import IngredientSerializer
+from .serializers import IngredientSerializer, QueryParamSerializer
 
 
 class IngredientSerializerTest(TestCase):
@@ -62,4 +62,15 @@ class IngredientSerializerTest(TestCase):
                 "cost_per_unit": "abc",
             }
         )
+        assert not serializer.is_valid()
+
+
+class QueryParamSerializerTest(TestCase):
+    def test_serializes_valid_data(self):
+        serializer = QueryParamSerializer(data={"price": 5})
+        serializer.is_valid(raise_exception=True)
+        assert serializer.validated_data == {"price": 5}
+
+    def test_fails_if_data_invalid(self):
+        serializer = QueryParamSerializer(data={"price": "abc"})
         assert not serializer.is_valid()

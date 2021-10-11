@@ -7,3 +7,7 @@ class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
         fields = ["name", "category", "unit", "cost_per_unit"]
+
+
+class QueryParamSerializer(serializers.Serializer):
+    price = serializers.FloatField()
