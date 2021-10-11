@@ -105,6 +105,7 @@ class ShoppingListIntegrationTest(TransactionTestCase):
             shopping_list=created_shopping_list, ingredient=created_product2, quantity=1
         )
         created_shopping_list_item2.save()
+        self.client.login(username="testuser", password="12345")
         response = self.client.get("/shopping/My Shopping List/")
         assert response.status_code == HTTPStatus.OK
         assert response.data == {
@@ -144,3 +145,39 @@ class ShoppingListIntegrationTest(TransactionTestCase):
             "title": "My Shopping List",
             "total_cost": 69.99,
         }
+
+    def test_must_be_shopping_list_owner(self):
+        created_product = Ingredient(
+            category="fresh",
+            name="My New Ingredient",
+            unit="g",
+            cost_per_unit=59.99,
+            available=True,
+        )
+        created_product.save()
+        created_product2 = Ingredient(
+            category="fresh",
+            name="My New Ingredient 2",
+            unit="g",
+            cost_per_unit=10,
+            available=True,
+        )
+        created_product2.save()
+        user = get_user_model().objects.create_user(
+            username="testuser", password="12345"
+        )
+
+        created_shopping_list = ShoppingList(user=user, title="My Shopping List")
+        created_shopping_list.save()
+        created_shopping_list_item = ShoppingListItem(
+            shopping_list=created_shopping_list, ingredient=created_product, quantity=1
+        )
+        created_shopping_list_item.save()
+        created_shopping_list_item2 = ShoppingListItem(
+            shopping_list=created_shopping_list, ingredient=created_product2, quantity=1
+        )
+        created_shopping_list_item2.save()
+        get_user_model().objects.create_user(username="testuser2", password="123456")
+        self.client.login(username="testuser2", password="123456")
+        response = self.client.get("/shopping/My Shopping List/")
+        assert response.status_code == HTTPStatus.FORBIDDEN
