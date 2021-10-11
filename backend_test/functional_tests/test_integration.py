@@ -75,7 +75,7 @@ class IngredientIntegrationTest(TransactionTestCase):
 
 
 class ShoppingListIntegrationTest(TransactionTestCase):
-    def test_finds_shopping_list_total_cost(self):
+    def test_finds_latest_shopping_list_total_cost(self):
         created_product = Ingredient(
             category="fresh",
             name="My New Ingredient",
@@ -107,9 +107,29 @@ class ShoppingListIntegrationTest(TransactionTestCase):
         created_shopping_list_item2.save()
         response = self.client.get("/shopping/My Shopping List/")
         assert response.status_code == HTTPStatus.OK
-        print(response.data)
         assert response.data == {
             "user": user.id,
             "title": "My Shopping List",
             "total_cost": 69.99,
+        }
+
+        created_product3 = Ingredient(
+            category="fresh",
+            name="My New Ingredient 3",
+            unit="g",
+            cost_per_unit=10,
+            available=True,
+        )
+        created_product3.save()
+        created_shopping_list_item3 = ShoppingListItem(
+            shopping_list=created_shopping_list, ingredient=created_product3, quantity=1
+        )
+        created_shopping_list_item3.save()
+
+        response = self.client.get("/shopping/My Shopping List/")
+        assert response.status_code == HTTPStatus.OK
+        assert response.data == {
+            "user": user.id,
+            "title": "My Shopping List",
+            "total_cost": 79.99,
         }

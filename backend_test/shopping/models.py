@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import Sum, F
 from django.utils.translation import ugettext_lazy as _
 
 from ingredient.models import Ingredient
@@ -20,7 +21,17 @@ class ShoppingList(models.Model):
     @property
     def total_cost(self):
         # Calculate the total cost of the shopping list
-        return 1
+        total_cost = round(
+            self.items.values("ingredient__cost_per_unit", "quantity")
+            .annotate(ingredient_cost=F("ingredient__cost_per_unit") * F("quantity"))
+            .aggregate(
+                total_cost=Sum(
+                    "ingredient_cost",
+                )
+            )["total_cost"],
+            2,
+        )
+        return total_cost
 
 
 class ShoppingListItem(models.Model):
