@@ -10,10 +10,6 @@ class ShoppingList(models.Model):
 
     title = models.CharField(_("Title"), max_length=250)
 
-    total_cost = models.PositiveIntegerField(
-        _("Cost"), help_text=_("Cost in pence, e.g. £4.53 -> 453")
-    )
-
     def __str__(self):
         return self.title
 
@@ -21,9 +17,10 @@ class ShoppingList(models.Model):
         verbose_name = _("Shopping List")
         verbose_name_plural = _("Shopping Lists")
 
-    def calculate_cost(self):
+    @property
+    def total_cost(self):
         # Calculate the total cost of the shopping list
-        pass
+        return 1
 
 
 class ShoppingListItem(models.Model):
