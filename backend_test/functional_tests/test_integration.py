@@ -1,8 +1,11 @@
 from http import HTTPStatus
 
+from django.contrib.auth import get_user_model
 from django.test import TransactionTestCase
 
 from ingredient.models import Ingredient
+
+from shopping.models import ShoppingList, ShoppingListItem
 
 
 class IngredientIntegrationTest(TransactionTestCase):
@@ -69,3 +72,44 @@ class IngredientIntegrationTest(TransactionTestCase):
         }
         saved_ingredient = Ingredient.objects.get(name="My New Ingredient")
         assert not saved_ingredient.available
+
+
+class ShoppingListIntegrationTest(TransactionTestCase):
+    def test_finds_shopping_list_total_cost(self):
+        created_product = Ingredient(
+            category="fresh",
+            name="My New Ingredient",
+            unit="g",
+            cost_per_unit=59.99,
+            available=True,
+        )
+        created_product.save()
+        created_product2 = Ingredient(
+            category="fresh",
+            name="My New Ingredient 2",
+            unit="g",
+            cost_per_unit=10,
+            available=True,
+        )
+        created_product2.save()
+        user = get_user_model().objects.create_user(
+            username="testuser", password="12345"
+        )
+        created_shopping_list = ShoppingList(user=user, title="My Shopping List")
+        created_shopping_list.save()
+        created_shopping_list_item = ShoppingListItem(
+            shopping_list=created_shopping_list, ingredient=created_product, quantity=1
+        )
+        created_shopping_list_item.save()
+        created_shopping_list_item2 = ShoppingListItem(
+            shopping_list=created_shopping_list, ingredient=created_product2, quantity=1
+        )
+        created_shopping_list_item2.save()
+        response = self.client.get("/shopping/My Shopping List/")
+        assert response.status_code == HTTPStatus.OK
+        print(response.data)
+        assert response.data == {
+            "user": user.id,
+            "title": "My Shopping List",
+            "total_cost": 69.99,
+        }
