@@ -22,7 +22,8 @@ class ShoppingList(models.Model):
     def total_cost(self):
         # Calculate the total cost of the shopping list
         total_cost = round(
-            self.items.values("ingredient__cost_per_unit", "quantity")
+            self.items.filter(ingredient__available=True)
+            .values("ingredient__cost_per_unit", "quantity")
             .annotate(ingredient_cost=F("ingredient__cost_per_unit") * F("quantity"))
             .aggregate(
                 total_cost=Sum(
