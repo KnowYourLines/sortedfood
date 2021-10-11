@@ -6,7 +6,7 @@ from .models import Ingredient
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
-        fields = ["name", "category", "unit", "cost_per_unit"]
+        fields = ["name", "category", "unit", "cost_per_unit", "available"]
 
 
 class QueryParamSerializer(serializers.Serializer):

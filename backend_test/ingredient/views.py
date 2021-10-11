@@ -26,4 +26,18 @@ class IngredientViewSet(
         )
         ingredient.is_valid(raise_exception=True)
         ingredient.save()
-        return Response(ingredient.validated_data)
+        updated_ingredient = self.get_serializer(self.get_object())
+        return Response(updated_ingredient.data)
+
+    @action(detail=True, methods=["patch"])
+    def flag_unavailable(self, request, **kwargs):
+        instance = self.get_object()
+        ingredient = self.get_serializer(
+            instance,
+            data={"available": False},
+            partial=True,
+        )
+        ingredient.is_valid(raise_exception=True)
+        ingredient.save()
+        updated_ingredient = self.get_serializer(self.get_object())
+        return Response(updated_ingredient.data)

@@ -15,6 +15,8 @@ class Ingredient(models.Model):
 
     cost_per_unit = models.FloatField(_("Cost Per Unit"), null=True, blank=True)
 
+    available = models.BooleanField(null=False, blank=False)
+
     def __str__(self):
         return self.name
 

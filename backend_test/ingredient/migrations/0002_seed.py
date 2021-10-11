@@ -19,6 +19,7 @@ def load_ingredients(apps, schema_editor):
                     category=ingredient["Excel Category"],
                     unit=ingredient["Unit"],
                     cost_per_unit=cost_per_unit,
+                    available=True,
                 )
             )
         Ingredient.objects.bulk_create(initial_ingredients)

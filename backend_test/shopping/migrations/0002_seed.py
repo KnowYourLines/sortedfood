@@ -20,7 +20,7 @@ def load_shopping_lists(apps, schema_editor):
                 user_id=User.objects.create_user(username=uuid.uuid4()).id,
             )
             ingredient, created = Ingredient.objects.get_or_create(
-                name=item["Ingredient"]
+                name=item["Ingredient"], available=True
             )
             initial_items.append(
                 ShoppingListItem(

@@ -11,6 +11,7 @@ class IngredientSerializerTest(TestCase):
                 "name": "My New Ingredient",
                 "unit": "g",
                 "cost_per_unit": 59.99,
+                "available": True,
             }
         )
         serializer.is_valid(raise_exception=True)
@@ -19,6 +20,7 @@ class IngredientSerializerTest(TestCase):
             "name": "My New Ingredient",
             "unit": "g",
             "cost_per_unit": 59.99,
+            "available": True,
         }
 
     def test_fails_if_name_missing(self):
@@ -27,6 +29,7 @@ class IngredientSerializerTest(TestCase):
                 "category": "fresh",
                 "unit": "g",
                 "cost_per_unit": 59.99,
+                "available": True,
             }
         )
         assert not serializer.is_valid()
@@ -38,6 +41,7 @@ class IngredientSerializerTest(TestCase):
                 "name": "My New Ingredient",
                 "unit": "g",
                 "cost_per_unit": 59.99,
+                "available": True,
             }
         )
         assert not serializer.is_valid()
@@ -49,6 +53,7 @@ class IngredientSerializerTest(TestCase):
                 "name": "My New Ingredient",
                 "unit": "a ton",
                 "cost_per_unit": 59.99,
+                "available": True,
             }
         )
         assert not serializer.is_valid()
@@ -60,6 +65,19 @@ class IngredientSerializerTest(TestCase):
                 "name": "My New Ingredient",
                 "unit": "g",
                 "cost_per_unit": "abc",
+                "available": True,
+            }
+        )
+        assert not serializer.is_valid()
+
+    def test_fails_if_availability_invalid(self):
+        serializer = IngredientSerializer(
+            data={
+                "category": "fresh",
+                "name": "My New Ingredient",
+                "unit": "g",
+                "cost_per_unit": "abc",
+                "available": 2,
             }
         )
         assert not serializer.is_valid()
