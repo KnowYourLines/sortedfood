@@ -4,6 +4,7 @@ from django.db.models import Sum, F
 from django.utils.translation import ugettext_lazy as _
 
 from ingredient.models import Ingredient
+from rest_framework.exceptions import ValidationError
 
 
 class ShoppingList(models.Model):
@@ -56,3 +57,8 @@ class ShoppingListItem(models.Model):
     class Meta:
         verbose_name = _("Shopping List Item")
         verbose_name_plural = _("Shopping List Items")
+
+    def save(self, *args, **kwargs):
+        if not self.ingredient.available:
+            raise ValidationError(_("Ingredient is unavailable"))
+        super().save(*args, **kwargs)

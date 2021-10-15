@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.test import TransactionTestCase
 
 from ingredient.models import Ingredient
+from rest_framework.exceptions import ValidationError
 
 from shopping.models import ShoppingList, ShoppingListItem
 
@@ -181,3 +182,49 @@ class ShoppingListIntegrationTest(TransactionTestCase):
         self.client.login(username="testuser2", password="123456")
         response = self.client.get("/shopping/My Shopping List/")
         assert response.status_code == HTTPStatus.FORBIDDEN
+
+    def test_ingredient_remains_on_shopping_list_when_made_unavailable(self):
+        created_product = Ingredient(
+            category="fresh",
+            name="My New Ingredient",
+            unit="g",
+            cost_per_unit=59.99,
+            available=True,
+        )
+        created_product.save()
+        user = get_user_model().objects.create_user(
+            username="testuser", password="12345"
+        )
+        created_shopping_list = ShoppingList(user=user, title="My Shopping List")
+        created_shopping_list.save()
+        created_shopping_list_item = ShoppingListItem(
+            shopping_list=created_shopping_list, ingredient=created_product, quantity=1
+        )
+        created_shopping_list_item.save()
+        created_product.available = False
+        created_product.save()
+        assert created_shopping_list.items.all()[0] == created_shopping_list_item
+
+    def test_unavailable_ingredient_cannot_be_added_to_shopping_list(self):
+        created_product = Ingredient(
+            category="fresh",
+            name="My New Ingredient",
+            unit="g",
+            cost_per_unit=59.99,
+            available=False,
+        )
+        created_product.save()
+        user = get_user_model().objects.create_user(
+            username="testuser", password="12345"
+        )
+        created_shopping_list = ShoppingList(user=user, title="My Shopping List")
+        created_shopping_list.save()
+        created_shopping_list_item = ShoppingListItem(
+            shopping_list=created_shopping_list, ingredient=created_product, quantity=1
+        )
+        with self.assertRaises(ValidationError) as error:
+            created_shopping_list_item.save()
+        assert (
+            str(error.exception)
+            == "[ErrorDetail(string='Ingredient is unavailable', code='invalid')]"
+        )
