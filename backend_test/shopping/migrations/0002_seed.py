@@ -17,7 +17,9 @@ def load_shopping_lists(apps, schema_editor):
 
             shopping_list, created = ShoppingList.objects.get_or_create(
                 title=item["Shopping List"],
-                user_id=User.objects.create_user(username=uuid.uuid4()).id,
+                defaults={
+                    "user_id": User.objects.create_user(username=uuid.uuid4()).id
+                },
             )
             ingredient, created = Ingredient.objects.get_or_create(
                 name=item["Ingredient"], available=True
